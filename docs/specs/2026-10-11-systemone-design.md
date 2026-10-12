@@ -165,6 +165,30 @@ Diagnostics:
 
 There are no retries in the plugin.
 
+## How agents use it
+
+The README gets a "How agents use it" section covering these three consumers. The plugin itself
+adds no consumer.
+
+1. **`decision_evaluate` tool.** Any agent with an effective `decisionModel` gets this core tool,
+   subject to tool policy. The agent decides when to call it, and passes explicit `state` plus a
+   `questions` map of choice, score or boolean questions. The tool reads no conversation on its
+   own. Agents rarely reach for it unprompted, so the README shows an `AGENTS.md` or skill line
+   that tells the agent when to use it. For example: "To triage a forwarded email, call
+   `decision_evaluate` with a phishing/scam/spam/legitimate choice and a severity score."
+2. **Decision assistance (experimental tool filtering).** This only runs when
+   `agents.defaults.experimental.decisionAssistance: true`. Before an eligible user turn, the
+   current request and up to about 6,000 UTF-16 code units of recent conversation go to the
+   decision model, and optional tools may be dropped for conversational turns. The README warns
+   that this sends chat content to the configured `baseUrl` on every eligible turn.
+3. **Other plugins.** They call `api.runtime.decisions.evaluate(...)` without handling credentials.
+
+Recommended rollout in the README:
+
+- select the model for one agent first, with `agents.entries.<id>.decisionModel: "systemone/default"`;
+- add the `AGENTS.md` guidance;
+- leave Decision assistance off until the tool's behavior has been checked.
+
 ## Section 4: testing and release
 
 Unit tests (vitest), one file per module:
