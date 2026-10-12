@@ -14,9 +14,9 @@ use a self-hosted System One model.
 The official `@openclaw/typesafe` plugin can't serve this use case:
 
 - it accepts only loopback `baseUrl` origins;
-- local requests always carry the model label `kev-latest`, which servers that route by model
-  name reject (verified: llama-server router returns `400 model 'kev-latest' not found`, and the
-  same request labeled `clef-flash` returns 200);
+- (corrected 2026-10-12) this spec originally said local requests always carry the label
+  `kev-latest`. That was wrong: TypeSafe sends the selected model, so `typesafe/clef-flash` sends
+  `clef-flash` (confirmed in openclaw/openclaw#169855). Only the other two limits apply;
 - it has no API key for local servers.
 
 ### Success criteria

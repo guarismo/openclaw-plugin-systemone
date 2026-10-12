@@ -8,15 +8,15 @@ model you host.
 ## Why not `@openclaw/typesafe`?
 
 The official [TypeSafe AI plugin](https://docs.openclaw.ai/plugins/typesafe) is built for hosted Jev
-and a Kev server running on the same machine. It doesn't fit self-hosted System One servers in
-three ways:
+and for System One servers running on the same machine. It sends the model you select, so
+`typesafe/<name>` works with a router on loopback. It doesn't fit two other setups:
 
-- `baseUrl` must be a loopback address, so a server on another machine is refused.
-- Local requests always carry the model label `kev-latest`. Servers that pick a model by name, such
-  as `llama-server` in router mode, reject it with `400 model 'kev-latest' not found`.
+- `baseUrl` must be a loopback address, so a server on another machine is refused
+  ([openclaw/openclaw#155155](https://github.com/openclaw/openclaw/issues/155155)).
 - There is no API key for local servers.
 
-This plugin removes all three limits.
+If your server runs on the gateway host and needs no key, use TypeSafe. Otherwise, this plugin
+removes both limits.
 
 ## Install
 
