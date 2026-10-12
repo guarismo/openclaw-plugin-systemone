@@ -3,3 +3,4 @@ dist/
 .clawhub-validation/
 *.tgz
 .superpowers/
+reports/
