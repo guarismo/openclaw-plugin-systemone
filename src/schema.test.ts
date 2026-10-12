@@ -46,7 +46,26 @@ describe("toWireRequest", () => {
       { state: null, questions: { s: { type: "score", criteria: ["none", null, { level: "high" }, ["a", "b"]] } } },
       undefined,
     );
-    expect(w.questions.s).toEqual({ type: "score", instructions: null, criteria: ["none", "", '{"level":"high"}', '["a","b"]'] });
+    expect(w.questions.s).toEqual({ type: "score", instructions: "Where does the state fall on this scale?", criteria: ["none", "", '{"level":"high"}', '["a","b"]'] });
+  });
+
+  it("fills missing or empty instructions, which some servers require", () => {
+    const w = toWireRequest(
+      {
+        state: "x",
+        questions: {
+          c: { type: "choice", criteria: { a: "x", b: "y" } },
+          s: { type: "score", instructions: "", criteria: ["lo", "hi"] },
+          n: { type: "boolean", criteria: { true: "is phishing" } },
+          kept: { type: "boolean", instructions: { ask: "is it?" } },
+        },
+      },
+      undefined,
+    );
+    expect(w.questions.c.instructions).toBe("Which option best describes the state?");
+    expect(w.questions.s.instructions).toBe("Where does the state fall on this scale?");
+    expect(w.questions.n.instructions).toBe("Is this true of the state?");
+    expect(w.questions.kept.instructions).toEqual({ ask: "is it?" });
   });
 });
 

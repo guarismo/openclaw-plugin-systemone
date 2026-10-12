@@ -18,10 +18,19 @@ export class InvalidResponseError extends Error {
 const criterionText = (level: DecisionEntry): string =>
   typeof level === "string" ? level : level === null ? "" : JSON.stringify(level);
 
+// The host contract lets callers omit instructions, but some servers (llama.cpp's router) reject a
+// question without non-empty instructions, so a neutral one is sent instead.
+const DEFAULT_INSTRUCTIONS = {
+  choice: "Which option best describes the state?",
+  score: "Where does the state fall on this scale?",
+  boolean: "Is this true of the state?",
+} as const;
+
 export function toWireRequest(batch: DecisionBatch, model: string | undefined): WireRequest {
   const questions: Record<string, WireQuestion> = {};
   for (const [id, q] of Object.entries(batch.questions)) {
-    const instructions = q.instructions ?? null;
+    const given = q.instructions;
+    const instructions = given === undefined || given === null || given === "" ? DEFAULT_INSTRUCTIONS[q.type] : given;
     if (q.type === "score") questions[id] = { type: "score", instructions, criteria: q.criteria.map(criterionText) };
     else if (q.type === "choice") questions[id] = { type: "choice", instructions, criteria: q.criteria };
     else questions[id] = q.criteria === undefined ? { type: "noul", instructions } : { type: "noul", instructions, criteria: q.criteria };
