@@ -88,7 +88,14 @@ The plugin only provides the model. Three things in OpenClaw can use it.
    in `AGENTS.md` or a skill. For example:
 
    > To triage a forwarded email, call `decision_evaluate` with a phishing/scam/spam/legitimate
-   > choice and a severity score.
+   > choice and a severity score. If it fails or is unavailable, say so; never invent results.
+
+   That last sentence matters for small chat models. In testing, a 12B model that got validation
+   errors from the tool reported made-up probabilities instead.
+
+   **Sandboxed agents:** an agent with sandbox `mode: "all"` only sees tools on its sandbox
+   allowlist. Add `decision_evaluate` to `tools.sandbox.tools.alsoAllow`, and to `tools.alsoAllow`
+   if the agent uses one, or tool search won't find it.
 
 2. **Decision assistance (experimental).** With
    `agents.defaults.experimental.decisionAssistance: true`, OpenClaw asks the decision model before
