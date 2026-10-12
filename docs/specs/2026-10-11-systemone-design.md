@@ -229,3 +229,32 @@ Release:
 - a README covering setup for Kev, the llama-server router and authenticated servers, plus a
   security section and the typesafe attribution;
 - version 0.1.0 on GitHub and ClawHub, published only with the owner's explicit OK.
+
+## Verification (2026-10-11)
+
+Run on megatron with OpenClaw 2026.10.1, against a llama.cpp router at `http://10.20.10.7:8080`
+serving `clef-flash`. The test agent was starscream (sandbox `mode: all`, chat model
+gemma-4-12b-qat, deferred tools).
+
+- **Package:** 79/79 unit tests pass. `clawhub package validate . --openclaw-version 2026.10.1`
+  gives Plugin Inspector PASS with 0 breakages, 0 warnings and no findings.
+- **Install:** `openclaw plugins install <path> --link --force` (a local source needs `--force`).
+  The config change hot-reloads with no gateway restart. A changed `dist/` does need a restart.
+- **Sandboxed agents:** `decision_evaluate` must be added to `tools.sandbox.tools.alsoAllow` (and
+  `tools.alsoAllow`) for agents with sandbox `mode: all`, or tool search never returns it.
+  `tools.invoke` over the gateway can't build the decision tool, so live checks need a real agent
+  turn.
+- **Found and fixed:** the llama.cpp router rejects questions without non-empty `instructions`
+  (`400 questions.x: "instructions" must be provided`) for choice, score and noul. The plugin now
+  sends neutral per-type defaults.
+- **Success path:** a choice, score and boolean batch returned `status ok`, model `clef-flash`,
+  `kind` phishing p 0.988, `danger` 2.30/3, `isPhish` 0.963, 333 input tokens, provenance
+  provider `systemone`.
+- **Error path:** with `model: kev-latest`, the result was `unavailable / unsupported-input`, and
+  the gateway log had
+  `systemone: unsupported-input: HTTP 400 from http://10.20.10.7:8080 (model 'kev-latest' not found)`.
+- **Pass-through:** with `decisionModel: systemone/clef-flash` and config `model: no-such-model`,
+  the result was `status ok`, model `clef-flash`.
+- **Agent behavior note:** in one run, gemma-4-12b reported invented values after its
+  `decision_evaluate` calls failed validation. The README advice to tell agents never to invent
+  results matters for small models.
