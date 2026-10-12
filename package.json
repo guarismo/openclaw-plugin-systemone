@@ -1,0 +1,46 @@
+{
+  "name": "openclaw-plugin-systemone",
+  "version": "0.1.0",
+  "description": "OpenClaw decision-model provider for System One servers (Kev, llama.cpp router and others), with a configurable base URL, model label and API key.",
+  "repository": { "type": "git", "url": "git+https://github.com/guarismo/openclaw-plugin-systemone.git" },
+  "homepage": "https://github.com/guarismo/openclaw-plugin-systemone#readme",
+  "bugs": { "url": "https://github.com/guarismo/openclaw-plugin-systemone/issues" },
+  "keywords": ["openclaw", "openclaw-plugin", "decision-model", "systemone", "kev", "llama.cpp", "classification"],
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run --config ./vitest.config.ts",
+    "validate": "npm run build && clawhub package validate . --out .clawhub-validation"
+  },
+  "files": ["dist", "openclaw.plugin.json", "README.md", "LICENSE"],
+  "peerDependencies": { "openclaw": ">=2026.10.1" },
+  "peerDependenciesMeta": { "openclaw": { "optional": true } },
+  "devDependencies": {
+    "openclaw": "2026.10.1",
+    "typescript": "5.9.3",
+    "vitest": "^3.2.0",
+    "@types/node": "^24.0.0"
+  },
+  "openclaw": {
+    "extensions": ["./dist/index.js"],
+    "compat": { "pluginApi": ">=2026.10.1" },
+    "build": { "openclawVersion": "2026.10.1" },
+    "install": {
+      "clawhubSpec": "clawhub:openclaw-plugin-systemone",
+      "defaultChoice": "clawhub",
+      "minHostVersion": ">=2026.10.1"
+    },
+    "release": { "publishToClawHub": true }
+  },
+  "pluginInspector": {
+    "version": 1,
+    "plugin": {
+      "id": "systemone",
+      "priority": "high",
+      "seams": ["plugin-runtime"],
+      "sourceRoot": ".",
+      "expect": { "registrations": ["registerDecisionProvider"] }
+    }
+  }
+}
