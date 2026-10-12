@@ -1,0 +1,67 @@
+{
+  "id": "systemone",
+  "name": "System One",
+  "description": "Typed decision provider for any System One server (Kev, llama.cpp router and others) with a configurable base URL, model label and API key.",
+  "version": "0.1.0",
+  "categories": ["developer-tools"],
+  "enabledByDefault": false,
+  "activation": { "onStartup": true },
+  "contracts": { "decisionProviders": ["systemone"] },
+  "decisionModels": [
+    {
+      "provider": "systemone",
+      "id": "default",
+      "name": "System One (configured model)",
+      "capabilities": {
+        "questionTypes": ["boolean", "choice", "score"],
+        "confidence": "provider-specific"
+      }
+    }
+  ],
+  "configContracts": {
+    "secretInputs": {
+      "paths": [{ "path": "apiKey", "expected": "string", "ownerKind": "capability" }]
+    }
+  },
+  "uiHints": {
+    "baseUrl": {
+      "label": "System One server",
+      "help": "Origin of the server, such as http://127.0.0.1:8009 or http://10.0.0.5:8080. The plugin appends /v1/systemone. No path, query or credentials."
+    },
+    "apiKey": {
+      "label": "API key",
+      "help": "Optional. Sent as Authorization: Bearer. Prefer a SecretRef in Settings → Secrets. Use https when the server is not on this machine.",
+      "sensitive": true
+    },
+    "model": {
+      "label": "Model label",
+      "help": "Sent as the System One model for systemone/default, for example clef-flash on a llama.cpp router. Leave empty for single-model servers such as Kev."
+    },
+    "timeoutMs": { "label": "Request timeout (ms)", "help": "1,000 to 30,000. OpenClaw allows each decision at most 30 seconds.", "advanced": true }
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["baseUrl"],
+    "properties": {
+      "baseUrl": { "type": "string", "maxLength": 256, "pattern": "^[Hh][Tt][Tt][Pp][Ss]?://[^/?#@\\s]+/?$" },
+      "apiKey": {
+        "anyOf": [
+          { "type": "string", "maxLength": 4096 },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["source", "provider", "id"],
+            "properties": {
+              "source": { "enum": ["env", "file", "exec", "store"] },
+              "provider": { "type": "string", "minLength": 1, "maxLength": 128 },
+              "id": { "type": "string", "minLength": 1, "maxLength": 1024 }
+            }
+          }
+        ]
+      },
+      "model": { "type": "string", "minLength": 1, "maxLength": 128 },
+      "timeoutMs": { "type": "integer", "minimum": 1000, "maximum": 30000, "default": 30000 }
+    }
+  }
+}
