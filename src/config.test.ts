@@ -42,11 +42,11 @@ describe("parseSettings", () => {
   });
 
   it("keeps model, string key and timeout", () => {
-    expect(parseSettings({ baseUrl: "http://h:1", model: "clef-flash", apiKey: "k", timeoutMs: 120000 })).toEqual({
+    expect(parseSettings({ baseUrl: "http://h:1", model: "clef-flash", apiKey: "k", timeoutMs: 20000 })).toEqual({
       baseUrl: "http://h:1",
       model: "clef-flash",
       apiKey: "k",
-      timeoutMs: 120000,
+      timeoutMs: 20000,
     });
   });
 
@@ -59,6 +59,12 @@ describe("parseSettings", () => {
     const s = parseSettings({ baseUrl: "http://h:1", apiKey: "  ", model: "" });
     expect(s?.apiKey).toBeUndefined();
     expect(s?.model).toBeUndefined();
+  });
+
+  it("caps timeouts at the host's 30 s decision budget", () => {
+    expect(parseSettings({ baseUrl: "http://h:1", timeoutMs: 30000 })?.timeoutMs).toBe(30000);
+    expect(parseSettings({ baseUrl: "http://h:1", timeoutMs: 60000 })?.timeoutMs).toBe(DEFAULT_TIMEOUT_MS);
+    expect(parseSettings({ baseUrl: "http://h:1", timeoutMs: 1000 })?.timeoutMs).toBe(1000);
   });
 
   it("clamps out-of-range timeouts to the default", () => {

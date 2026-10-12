@@ -3,7 +3,8 @@ export type Settings = { baseUrl: string; apiKey?: string | SecretRef; model?: s
 
 export const DEFAULT_TIMEOUT_MS = 30_000;
 const MIN_TIMEOUT_MS = 1_000;
-const MAX_TIMEOUT_MS = 300_000;
+// OpenClaw caps every decision at 30 s (DecisionProviderHost budget), so a longer timeout can't apply.
+const MAX_TIMEOUT_MS = 30_000;
 const MAX_BASE_URL_LENGTH = 256;
 const MAX_MODEL_LENGTH = 128;
 

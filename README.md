@@ -67,7 +67,7 @@ agents: {
 | `baseUrl` | string | required | An `http://` or `https://` origin: host and optional port, nothing else. The plugin calls `<baseUrl>/v1/systemone`. Paths, query strings, fragments and `user:pass@` are rejected. |
 | `apiKey` | string or SecretRef | none | Sent as `Authorization: Bearer <key>`. A SecretRef (`{ source: env\|file\|exec\|store, provider, id }`) is resolved at gateway startup and hidden in Settings. |
 | `model` | string | none | The model label that `systemone/default` sends. Leave it empty for single-model servers such as Kev. |
-| `timeoutMs` | integer | 30000 | Per-request limit, from 1,000 to 300,000. The plugin never waits past OpenClaw's own deadline for the decision. |
+| `timeoutMs` | integer | 30000 | Per-request limit, from 1,000 to 30,000. OpenClaw allows each decision at most 30 seconds, so a model that is slower than that can't be used. Use a smaller `timeoutMs` if you want to fail faster. |
 
 ## Choosing models
 
@@ -117,8 +117,8 @@ gateway log gets one `systemone:` warning line saying why.
 
 | What happened | Reason |
 |---|---|
-| `baseUrl` missing or invalid | not ready (Settings shows the plugin as not configured) |
-| A SecretRef `apiKey` didn't resolve at startup | `credentials-unavailable` |
+| `baseUrl` missing or invalid, or a SecretRef `apiKey` that didn't resolve | the provider reports not ready, and calls return `credentials-unavailable` (an invalid `baseUrl` is normally refused when the config is saved) |
+| An `apiKey` with spaces or control characters (for example a trailing newline from a file) | `credentials-unavailable` (the key isn't sent or logged) |
 | HTTP 401 or 403 | `authentication` |
 | HTTP 429 | `rate-limited`, with `retry-after` passed on |
 | HTTP 400, 413 or 422, including an unknown model label | `unsupported-input` |

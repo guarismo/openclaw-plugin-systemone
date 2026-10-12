@@ -107,6 +107,15 @@ describe("postEvaluation", () => {
   });
 });
 
+describe("postEvaluation key safety", () => {
+  it("never logs the key from a network error message", async () => {
+    const { fetchImpl } = fake(new TypeError('Headers.append: "Bearer sk-SECRET\nX" is an invalid header value.'));
+    const err = await reasonOf(call(fetchImpl, { apiKey: "sk-SECRET\nX" }));
+    expect(err.reason).toBe("transport");
+    expect(err.message).not.toContain("sk-SECRET");
+  });
+});
+
 describe("sanitizeDetail", () => {
   it("masks the key and bearer tokens, strips control characters and truncates", () => {
     const out = sanitizeDetail("Bearer abc.def k3y\u0000 " + "z".repeat(300), "k3y");

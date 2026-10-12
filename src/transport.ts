@@ -115,8 +115,10 @@ export async function postEvaluation(params: {
     });
   } catch (error) {
     const name = error instanceof Error ? error.name : "Error";
-    const what = signal.aborted ? (params.signal.aborted ? "cancelled" : "timed out") : `${name}: ${error instanceof Error ? error.message : String(error)}`;
-    throw new SystemOneError("transport", `request ${what} ${origin}`.replace(/\s+/g, " ").slice(0, 260));
+    const what = signal.aborted
+      ? (params.signal.aborted ? "cancelled" : "timed out")
+      : `${name}: ${sanitizeDetail(error instanceof Error ? error.message : String(error), apiKey)}`;
+    throw new SystemOneError("transport", `request ${what} ${origin}`);
   }
 
   try {

@@ -67,6 +67,32 @@ describe("createProvider", () => {
     expect(r.warn.mock.calls[0][0]).not.toContain("K\"");
   });
 
+  it("rejects keys that cannot be sent as a header, without logging them", async () => {
+    const ref = { source: "file" as const, provider: "default", id: "K" };
+    for (const over of [
+      { getSettings: () => ({ ...settings, apiKey: "sk-ab\ncd" }) },
+      { getSettings: () => ({ ...settings, apiKey: ref }), readPreparedKey: () => "sk-ab\ncd\n" },
+    ]) {
+      const r = setup(over);
+      expect(await r.provider.evaluate(batch, ctx())).toEqual({ status: "unavailable", reason: "credentials-unavailable" });
+      expect(r.post).not.toHaveBeenCalled();
+      expect(r.warn.mock.calls[0][0]).not.toContain("sk-ab");
+    }
+  });
+
+  it("trims a prepared key", async () => {
+    const ref = { source: "file" as const, provider: "default", id: "K" };
+    const r = setup({ getSettings: () => ({ ...settings, apiKey: ref }), readPreparedKey: () => "sk-abcd\n" });
+    await r.provider.evaluate(batch, ctx());
+    expect(r.post.mock.calls[0][0].apiKey).toBe("sk-abcd");
+  });
+
+  it("is not ready while a SecretRef key is unresolved", () => {
+    const ref = { source: "env" as const, provider: "default", id: "K" };
+    expect(setup({ getSettings: () => ({ ...settings, apiKey: ref }), readPreparedKey: () => undefined }).provider.isReady?.()).toBe(false);
+    expect(setup({ getSettings: () => ({ ...settings, apiKey: ref }), readPreparedKey: () => "k" }).provider.isReady?.()).toBe(true);
+  });
+
   it("maps transport errors and logs one safe line", async () => {
     const { provider, warn } = setup({ post: vi.fn(async () => { throw new SystemOneError("unsupported-input", 'HTTP 400 from http://10.20.10.7:8080 (model \'kev-latest\' not found)'); }) });
     expect(await provider.evaluate(batch, ctx())).toEqual({ status: "unavailable", reason: "unsupported-input" });

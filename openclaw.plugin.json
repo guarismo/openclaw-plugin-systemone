@@ -37,7 +37,7 @@
       "label": "Model label",
       "help": "Sent as the System One model for systemone/default, for example clef-flash on a llama.cpp router. Leave empty for single-model servers such as Kev."
     },
-    "timeoutMs": { "label": "Request timeout (ms)", "advanced": true }
+    "timeoutMs": { "label": "Request timeout (ms)", "help": "1,000 to 30,000. OpenClaw allows each decision at most 30 seconds.", "advanced": true }
   },
   "configSchema": {
     "type": "object",
@@ -61,7 +61,7 @@
         ]
       },
       "model": { "type": "string", "minLength": 1, "maxLength": 128 },
-      "timeoutMs": { "type": "integer", "minimum": 1000, "maximum": 300000, "default": 30000 }
+      "timeoutMs": { "type": "integer", "minimum": 1000, "maximum": 30000, "default": 30000 }
     }
   }
 }
